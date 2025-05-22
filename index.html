@@ -68,6 +68,8 @@
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
         }
         .video-card:hover {
             transform: translateY(-5px);
@@ -76,20 +78,27 @@
         .video-link {
             display: block;
             position: relative;
+            overflow: hidden;
+            padding-top: 133.33%; /* 4:3的高宽比 */
         }
         .video-img {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 400px;
+            height: 100%;
             object-fit: cover;
-            display: block;
         }
         .video-title {
             padding: 15px;
             color: #333;
             font-size: 14px;
             line-height: 1.4;
-            height: 80px;
+            min-height: 80px;
             overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
         .loading {
             text-align: center;
@@ -106,12 +115,76 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             color: #666;
         }
-        @media (max-width: 768px) {
+        
+        @media (max-width: 1024px) {
             .video-grid {
                 grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             }
-            .video-img {
-                height: 330px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .video-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .video-card {
+                flex-direction: column;
+            }
+            
+            .video-link {
+                width: 100%;
+                padding-top: 133.33%; /* 保持4:3比例 */
+            }
+            
+            .video-title {
+                width: 100%;
+                padding: 12px;
+                min-height: 60px;
+                font-size: 14px;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            h1 {
+                margin-bottom: 10px;
+                font-size: 20px;
+            }
+            
+            .file-selector {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            select {
+                flex-grow: 1;
+                margin-right: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .video-title {
+                font-size: 13px;
+                min-height: 50px;
+                padding: 10px;
+            }
+            
+            .refresh-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            
+            select {
+                padding: 6px 8px;
+                font-size: 13px;
             }
         }
     </style>
@@ -178,6 +251,8 @@
         
         // 从文件加载数据
         async function loadDataFromFile(filePath) {
+            document.getElementById('videoGrid').innerHTML = '<div class="loading">加载中...</div>';
+            
             try {
                 const response = await fetch(filePath);
                 if (!response.ok) {
