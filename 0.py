@@ -16,6 +16,9 @@ print("已启动浏览器...")
 # 抖音用户页面URL
 url = "https://www.douyin.com/user/MS4wLjABAAAAYwyiRKq3-5i1YzlMJDSZc5AE7p7AuwL9qt9rU78_Y9Y?from_tab_name=main&vid=7507105148011875611"
 
+# li元素的class,可能每个频道不一样
+li_class = "niBfRBgX Q_uOVQ1u SBWUpJd_"
+
 # 访问页面
 page.get(url)
 print("已打开页面...")
@@ -23,51 +26,63 @@ print("已打开页面...")
 # 等待页面加载
 time.sleep(3)
 
-try:
-    # 获取所有图片元素
-    images = page.eles('css:.cover-container img')
+
+def get_page_height():
+    page_height = page.run_js('return document.documentElement.scrollHeight;')
+    return page_height
+
+
+
+
+def  scroll_to_bottom():
+    # 获取页面高度
+    page_height_old = get_page_height()
     
-    if not images:
-        print("未找到图片元素，尝试其他选择器...")
-        images = page.eles('img')
-    
-    print(f"找到 {len(images)} 个图片元素")
-    
-    # 遍历图片元素并提取信息
-    for i, img in enumerate(images):
-        try:
-            # 获取图片URL和alt文本
-            img_url = img.attr('src')
-            img_alt = img.attr('alt')
-            
-            if img_url:
-                print(f"图片 {i+1}:")
-                print(f"链接: {img_url}")
-                print(f"描述: {img_alt}")
-                print("-" * 50)
-                
-        except Exception as e:
-            print(f"处理图片 {i+1} 时出错: {str(e)}")
-    
-    # 如果你只需要特定的图片（根据你提供的示例）
-    print("\n尝试查找特定图片...")
-    specific_img = page.ele('xpath://img[contains(@alt, "Ai设计")]')
-    if specific_img:
-        img_url = specific_img.attr('src')
-        img_alt = specific_img.attr('alt')
-        print("\n找到指定图片:")
-        print(f"链接: {img_url}")
-        print(f"描述: {img_alt}")
+    # 滚动到页面底部
+    page.run_js(f'window.scrollTo(0, {page_height_old});')
+    time.sleep(3)  
+
+    page_height_new = get_page_height()
+
+    if page_height_new == page_height_old:
+        print("已滚动到页面底部")
     else:
-        print("未找到指定的图片元素")
+        print("未滚动到页面底部")
+        scroll_to_bottom()
+        time.sleep(3)    
+
+
+
+
+try:
+
+
+    scroll_to_bottom()
+
+    # 获取所有具有特定class的<li>元素
+    li_elements = page.eles(f'css:li.{li_class.replace(" ", ".")}')
+    
+    if not li_elements:
+        print("未找到符合条件的<li>元素")
+    else:
+        print(f"找到 {len(li_elements)} 个符合条件的<li>元素")
+        
+        # # 遍历并打印每个<li>元素的内容
+        # for i, li in enumerate(li_elements):
+        #     try:
+        #         print(f"\n<li> 元素 {i+1}:")
+        #         print(li.html)  # 打印元素的HTML内容
+        #         print("-" * 50)
+        #     except Exception as e:
+        #         print(f"处理<li>元素 {i+1} 时出错: {str(e)}")
         
 except Exception as e:
     print(f"爬取过程中出错: {str(e)}")
     traceback.print_exc()
-finally:
-    # 关闭浏览器
-    page.quit()
-    print("浏览器已关闭")
+# finally:
+#     # 关闭浏览器
+#     page.quit()
+#     print("浏览器已关闭")
 
 
 
