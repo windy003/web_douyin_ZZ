@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音视频浏览器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #ff2d55;
+            font-size: 24px;
+        }
+        .file-selector {
+            display: flex;
+            align-items: center;
+        }
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        .refresh-btn {
+            padding: 8px 16px;
+            background-color: #ff2d55;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .refresh-btn:hover {
+            background-color: #ff0044;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .video-card {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .video-link {
+            display: block;
+            position: relative;
+        }
+        .video-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+        .video-title {
+            padding: 15px;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.4;
+            height: 80px;
+            overflow: hidden;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            .video-img {
+                height: 330px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>抖音博主视频随机浏览器</h1>
+            <div class="file-selector">
+                <select id="fileSelect">
+                    <option value="AI设计.txt">AI设计</option>
+                    <!-- 更多选项会动态添加 -->
+                </select>
+            </div>
+        </header>
+        
+        <div class="video-grid" id="videoGrid">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <button class="refresh-btn" id="refreshBtn">随机换一批</button>
+
+    
+    <script>
+        // 存储所有视频数据
+        let allVideos = [];
+        // 当前文件备注
+        let currentFileNote = '';
+        
+        // 从文件加载数据
+        async function loadDataFromFile(fileName) {
+            try {
+                const response = await fetch(`stocks/${fileName}`);
+                const text = await response.text();
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                
+                // 第一行是备注信息
+                currentFileNote = lines[0];
+                
+                // 解析视频和图片链接
+                const videos = [];
+                for (let i = 1; i < lines.length; i += 2) {
+                    if (i + 1 < lines.length) {
+                        const videoUrl = lines[i].trim();
+                        const imgLine = lines[i + 1].trim();
+                        
+                        // 提取图片URL和alt文本
+                        const srcMatch = imgLine.match(/src="([^"]+)"/);
+                        const altMatch = imgLine.match(/alt="([^"]+)"/);
+                        
+                        if (srcMatch && altMatch) {
+                            videos.push({
+                                videoUrl: videoUrl,
+                                imgUrl: srcMatch[1],
+                                title: altMatch[1]
+                            });
+                        }
+                    }
+                }
+                
+                allVideos = videos;
+                displayRandomVideos();
+                
+            } catch (error) {
+                console.error('加载文件失败:', error);
+                document.getElementById('videoGrid').innerHTML = `
+                    <div class="loading">加载失败，请刷新页面重试</div>
+                `;
+            }
+        }
+        
+        // 显示随机视频
+        function displayRandomVideos() {
+            // 随机选择5个视频
+            const shuffled = [...allVideos].sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 5);
+            
+            const videoGrid = document.getElementById('videoGrid');
+            videoGrid.innerHTML = '';
+            
+            selected.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.innerHTML = `
+                    <a href="${video.videoUrl}" class="video-link" target="_blank">
+                        <img src="${video.imgUrl}" alt="${video.title}" class="video-img">
+                    </a>
+                    <div class="video-title">${video.title}</div>
+                `;
+                videoGrid.appendChild(videoCard);
+            });
+        }
+        
+        // 加载文件列表
+        async function loadFileList() {
+            try {
+                const response = await fetch('stocks/');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = Array.from(doc.querySelectorAll('a'))
+                    .filter(a => a.href.endsWith('.txt'))
+                    .map(a => a.innerText || a.textContent);
+                
+                const fileSelect = document.getElementById('fileSelect');
+                fileSelect.innerHTML = '';
+                
+                links.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file;
+                    option.textContent = file.replace('.txt', '');
+                    fileSelect.appendChild(option);
+                });
+                
+                // 加载第一个文件
+                if (links.length > 0) {
+                    loadDataFromFile(links[0]);
+                }
+                
+            } catch (error) {
+                console.error('加载文件列表失败:', error);
+                // 如果无法获取文件列表，默认加载AI设计.txt
+                loadDataFromFile('AI设计.txt');
+            }
+        }
+        
+        // 页面加载后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始加载
+            loadFileList();
+            
+            // 文件选择变化时
+            document.getElementById('fileSelect').addEventListener('change', (e) => {
+                loadDataFromFile(e.target.value);
+            });
+            
+            // 刷新按钮点击时
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                displayRandomVideos();
+            });
+        });
+    </script>
+</body>
+</html>
