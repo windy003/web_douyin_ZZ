@@ -2,6 +2,10 @@ from DrissionPage import ChromiumPage
 import time
 import json
 
+
+
+
+start_time = time.time()
 # 直接指定地址创建连接
 page = ChromiumPage(addr_or_opts='127.0.0.1:4000')
 print("已连接到现有浏览器...")
@@ -19,7 +23,7 @@ try:
     # 打印找到的元素数量
     print(f"找到 {len(li_elements)} 个视频元素")
     
-    for element in li_elements:
+    for i, element in enumerate(li_elements):
         try:
             # 查找 href 以 /video 开头的 <a> 标签
             video_link = element.ele('css:a[href^="/video"]')
@@ -31,9 +35,9 @@ try:
                     video_url = 'https://www.douyin.com' + video_url
                 content += video_url + "\n"
                 
-                print(f"找到视频链接: {video_url}")
+                print(f"{i+1}找到视频链接: {video_url}")
             else:
-                print("未找到符合条件的视频链接")
+                print(f"{i+1}未找到符合条件的视频链接:{video_link}")
         except Exception as e:
             print(f"处理元素时出错: {str(e)}")
 
@@ -48,6 +52,9 @@ try:
         with open('content.txt', 'w', encoding='utf-8') as f:
             f.write(content)
 
+
+    end_time = time.time()
+    print(f"爬取完成，用时: {end_time - start_time} /60 分钟")
 
 except Exception as e:
     print(f"爬取过程中出错: {str(e)}")
