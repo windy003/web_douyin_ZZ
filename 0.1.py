@@ -26,9 +26,9 @@ try:
     for i, element in enumerate(li_elements):
         try:
             # 查找 href 以 /video 开头的 <a> 标签
-            video_link = element.ele('css:a[href^="/video"]')
-            
-            if video_link:
+            # 注意timeout前面不加空格如果报错,就加空格
+            if element.ele('css:a[href^="/video"]', timeout=1):
+                video_link = element.ele('css:a[href^="/video"]', timeout=1)
                 # 获取完整的视频链接
                 video_url = video_link.attr('href')
                 if not video_url.startswith('http'):
@@ -37,24 +37,35 @@ try:
                 
                 print(f"{i+1}找到视频链接: {video_url}")
             else:
-                print(f"{i+1}未找到符合条件的视频链接:{video_link}")
+                video_link = element.ele('css:a[href^="/video"]', timeout=1)
+                print(f"{i+1}未找到符合条件的视频链接:video_link:{video_link},element:{element}")
+                continue
         except Exception as e:
             print(f"处理元素时出错: {str(e)}")
 
 
         try:
-            img = element.ele('css:img')
-            content += img.html + "\n"
+            if element.ele('css:img', timeout=1):
+            
+                
+                img = element.ele('css:img', timeout=1)
+                content += img.html.replace("\n", "") + "\n"
+
+            else:
+                img = element.ele('css:img')
+                continue
+                print(f"未找到图片:element:{element}")
         except Exception as e:
             print(f"获取图片时出错: {str(e)}")
 
 
-        with open('content.txt', 'w', encoding='utf-8') as f:
-            f.write(content)
+    with open('content.txt', 'w', encoding='utf-8') as f:
+        f.write(content)
 
 
     end_time = time.time()
-    print(f"爬取完成，用时: {end_time - start_time} /60 分钟")
+    total_time = (end_time - start_time)/60
+    print(f"爬取完成，用时: {total_time:.2f} 分钟")
 
 except Exception as e:
     print(f"爬取过程中出错: {str(e)}")
