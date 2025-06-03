@@ -256,7 +256,7 @@
         }
         
         // 从 localStorage 中获取上次选择的作者
-        const lastSelectedAuthor = localStorage.getItem('lastSelectedAuthor');
+        const lastSelectedAuthor = localStorage.getItem('web_douyin_ZZ_LSA');
         if (lastSelectedAuthor) {
             fileSelect.value = lastSelectedAuthor;
         }
@@ -319,7 +319,7 @@
             fileSelect.addEventListener('change', (e) => {
                 loadDataFromFile(e.target.value);
                 // 存储当前选择的作者
-                localStorage.setItem('lastSelectedAuthor', e.target.value);
+                localStorage.setItem('web_douyin_ZZ_LSA', e.target.value);
             });
             
             // 刷新按钮点击时
