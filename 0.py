@@ -17,7 +17,8 @@ content = ""
 try:
     
     # 获取所有视频元素
-    li_class = "niBfRBgX Q_uOVQ1u SBWUpJd_"
+    # li_class = "niBfRBgX Q_uOVQ1u SBWUpJd_"
+    li_class = "SmHs0qqX Q_uOVQ1u SBWUpJd_"
     li_elements = page.eles(f'css:li.{li_class.replace(" ", ".")}')
     
     # 打印找到的元素数量
