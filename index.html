@@ -66,7 +66,7 @@
         .video-card {
             background-color: #fff;
             border-radius: 8px;
-            overflow: hidden;
+            overflow: visible;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.3s;
             display: flex;
@@ -95,11 +95,11 @@
             color: #333;
             font-size: 14px;
             line-height: 1.4;
-            min-height: 80px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
+            min-height: auto;
+            overflow: visible;
+            display: block;
+            word-wrap: break-word;
+            word-break: break-all;
         }
         .loading {
             text-align: center;
