@@ -39,8 +39,8 @@ try:
     for i, element in enumerate(li_elements):
         try:
             # 先尝试查找 /video 链接
-            video_link = element.ele('css:a[href^="/video"]', timeout=1)
-            note_link = element.ele('css:a[href*="/note"]', timeout=1)
+            video_link = element.ele('css:a[href^="/video"]',timeout=0)
+            note_link = element.ele('css:a[href*="/note"]',timeout=0)
             if video_link:
                 video_url = video_link.attr('href')
                 if not video_url.startswith('http'):
@@ -55,9 +55,12 @@ try:
                     content += note_url + "\n"
                     print(f"{i+1}找到笔记链接: {note_url}")
                     content += get_img(element)
+
+        
         except Exception as e:
             print(f"获取图片时出错: {str(e)}")
-            continue
+
+        continue
 
 
 
